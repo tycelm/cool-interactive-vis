@@ -45,7 +45,7 @@
     const margin = { top: 40, right: 40, bottom: 60, left: 70 };
     const tooltip = d3.select(".tooltip");
 
-    d3.csv("data/steam_games.csv").then(data => {
+    d3.csv("steam_games.csv").then(data => {   //if data inside directory, then use directory_name/steam...... 
         // transforming data
         data.forEach(d => {
             d.price = +d["price_initial (USD)"];
