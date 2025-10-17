@@ -5,16 +5,31 @@ const timelineMargin = { top: 20, right: 40, bottom: 20, left: 40 };
 class Timeline {
   constructor(data) {
     this._data = data;
+    this.filterType = "indie"; // default to indie
+    this.svg = null;
+  }
+
+  setFilter(type) {
+    this.filterType = type;
+  }
+
+  getFilteredData() {
+    let vis = this;
+    
+    if (vis.filterType === "indie") {
+      // Filter for Indie games (must include "Indie" genre)
+      return vis._data.filter(d => d.genres.includes("Indie") && d.genres.includes("Action"));
+    } else {
+      // Filter for Studio games (must NOT include "Indie" genre, but include "Action")
+      return vis._data.filter(d => !d.genres.includes("Indie") && d.genres.includes("Action"));
+    }
   }
 
   initVis() {
     let vis = this;
 
-    // filter Indie & Action
-    // TODO: need to change this for the dropdown menu?
-    const filtered = vis._data.filter(
-      (d) => d.genres.includes("Indie") && d.genres.includes("Action")
-    );
+    // filter based on dropdown selection
+    const filtered = vis.getFilteredData();
 
     const yearlyCounts = d3.rollup(
       filtered,
@@ -52,7 +67,7 @@ class Timeline {
       .range([timelineHeight - timelineMargin.bottom, timelineMargin.top]);
 
     // make timeline svg
-    let timeline = d3
+    vis.svg = d3
       .select("#timeline")
       .append("svg")
       .attr("width", width + timelineMargin.left + timelineMargin.right)
@@ -61,8 +76,9 @@ class Timeline {
       .attr("transform", "translate(" + timelineMargin.right + ",0)");
 
     // y-axis
-    timeline
+    vis.svg
       .append("g")
+      .attr("class", "y-axis")
       .attr("transform", `translate(${timelineMargin.left},0)`)
       .call(d3.axisLeft(vis.countY).ticks(3))
       .append("text")
@@ -80,9 +96,11 @@ class Timeline {
       .y0(vis.countY(0)) // baseline (where the area starts)
       .y1((d) => vis.countY(d.count))
       .curve(d3.curveCardinal);
+    
     // draw line graph
-    timeline
+    vis.svg
       .append("path")
+      .attr("class", "area-path")
       .datum(yearData)
       .style("fill", "#058dc7")
       .attr("d", area);
@@ -97,7 +115,7 @@ class Timeline {
       .on("brush", brushed);
 
     // Append brush component here
-    timeline
+    vis.svg
       .append("g")
       .attr("class", "x brush")
       .call(vis.brush)
@@ -106,8 +124,9 @@ class Timeline {
       .attr("height", timelineHeight + 7);
 
     // x-axis
-    timeline
+    vis.svg
       .append("g")
+      .attr("class", "x-axis")
       .attr(
         "transform",
         `translate(0,${timelineHeight - timelineMargin.bottom})`
@@ -126,5 +145,72 @@ class Timeline {
       .attr("fill", "#fff")
       .attr("text-anchor", "middle")
       .text("Year");
+  }
+
+  updateVis() {
+    let vis = this;
+
+    // filter based on dropdown selection
+    const filtered = vis.getFilteredData();
+
+    const yearlyCounts = d3.rollup(
+      filtered,
+      (v) => v.length,
+      (d) => new Date(d.release_date).getFullYear()
+    );
+
+    // convert the map to an array, then sort it
+    const yearData = Array.from(yearlyCounts, ([year, count]) => ({
+      year,
+      count,
+    }))
+      .filter((d) => !isNaN(d.year))
+      .filter((d) => d.year >= 2006)
+      .sort((a, b) => a.year - b.year);
+
+    // update scale domains
+    let yearRange = d3.extent(yearData, (d) => d.year);
+    vis.timeX.domain(yearRange);
+    vis.countY.domain([0, d3.max(yearData, (d) => d.count)]);
+
+    // update axes
+    vis.svg.select(".y-axis")
+      .transition()
+      .duration(1000)
+      .call(d3.axisLeft(vis.countY).ticks(3));
+
+    vis.svg.select(".x-axis")
+      .transition()
+      .duration(1000)
+      .call(
+        d3
+          .axisBottom(vis.timeX)
+          .tickFormat(d3.format("d"))
+          .tickSize(
+            -(timelineHeight - timelineMargin.top - timelineMargin.bottom)
+          )
+      );
+
+    // update area
+    const area = d3
+      .area()
+      .x((d) => vis.timeX(d.year))
+      .y0(vis.countY(0))
+      .y1((d) => vis.countY(d.count))
+      .curve(d3.curveCardinal);
+
+    vis.svg.select(".area-path")
+      .datum(yearData)
+      .transition()
+      .duration(1000)
+      .attr("d", area);
+
+    // update brush extent
+    vis.brush.extent([
+      [timelineMargin.left, 0],
+      [width - timelineMargin.right, timelineHeight],
+    ]);
+
+    vis.svg.select(".x.brush").call(vis.brush);
   }
 }

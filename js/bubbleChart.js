@@ -7,11 +7,28 @@ const tooltip = d3.select(".tooltip");
 class BubbleChart {
   constructor(data) {
     this._data = data;
+    this.filterType = "indie"; // default to indie
+  }
+
+  setFilter(type) {
+    this.filterType = type;
+  }
+
+  getFilteredData() {
+    let vis = this;
+    
+    if (vis.filterType === "indie") {
+      // Filter for Indie games (must include "Indie" genre)
+      return vis._data.filter(d => d.genres.includes("Indie") && d.genres.includes("Action"));
+    } else {
+      // Filter for Studio games (must NOT include "Indie" genre, but include "Action")
+      return vis._data.filter(d => !d.genres.includes("Indie") && d.genres.includes("Action"));
+    }
   }
 
   initVis() {
     let vis = this;
-    //if data inside directory, then use directory_name/steam......
+    
     // transforming data
     vis._data.forEach((d) => {
       d.price = +d["price_initial (USD)"];
@@ -30,11 +47,8 @@ class BubbleChart {
         : [];
     });
 
-    // filter Indie & Action
-    // TODO: need to change this for the dropdown menu?
-    const filtered = vis._data.filter(
-      (d) => d.genres.includes("Indie") && d.genres.includes("Action")
-    );
+    // filter based on dropdown selection
+    const filtered = vis.getFilteredData();
     console.log("Filtered rows:", filtered.length);
 
     // scale
@@ -142,13 +156,8 @@ class BubbleChart {
   updateVis(timeDomain) {
     let vis = this;
 
-    // update diplay data to filter data only based on year range
-    // TODO: need to change this for the dropdown menu?
-    const filtered = vis._data.filter(
-      (d) => d.genres.includes("Indie") && d.genres.includes("Action")
-    );
+    const filtered = vis.getFilteredData();
 
-    // filter based on min n max of domain
     const [min, max] = timeDomain;
     const timeFiltered = filtered.filter((d) => {
       return d.year >= min && max >= d.year;

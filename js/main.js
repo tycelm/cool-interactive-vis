@@ -1,4 +1,4 @@
-let bubblechart, timeline;
+let bubblechart, timeline, dropdown;
 
 loadData();
 
@@ -6,13 +6,15 @@ function loadData() {
   d3.csv("data/steam_games.csv").then((data) => {
     // init bubble chart
     bubblechart = new BubbleChart(data);
-
     bubblechart.initVis();
 
     // init timeline
     timeline = new Timeline(data);
-
     timeline.initVis();
+
+    // init dropdown
+    dropdown = new Dropdown(data, bubblechart, timeline);
+    dropdown.initVis();
   });
 }
 
