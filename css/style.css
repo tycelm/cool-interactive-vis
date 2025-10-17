@@ -1,26 +1,36 @@
-        body {
-            font-family: system-ui, sans-serif;
-            margin: 40px;
-            text-align: center;
-            background: #fafafa;
-        }
-        svg {
-            background: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border-radius: 12px;
-        }
-        circle:hover {
-            stroke: black;
-            stroke-width: 1.5px;
-        }
-        .tooltip {
-            position: absolute;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
+body {
+    font-family: system-ui, sans-serif;
+    margin: 40px;
+    text-align: center;
+    background: #161920;
+}
+h2{
+     color: white;
+}
+svg {
+    background: #1f2733;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    color: white;
+}
+circle:hover {
+    stroke: black;
+    stroke-width: 1.5px;
+}
+.tooltip {
+    position: absolute;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}
