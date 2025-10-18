@@ -16,13 +16,17 @@ class BubbleChart {
 
   getFilteredData() {
     let vis = this;
-    
+
     if (vis.filterType === "indie") {
       // Filter for Indie games (must include "Indie" genre)
-      return vis._data.filter(d => d.genres.includes("Indie") && d.genres.includes("Action"));
+      return vis._data.filter(
+        (d) => d.genres.includes("Indie") && d.genres.includes("Action")
+      );
     } else {
       // Filter for Studio games (must NOT include "Indie" genre, but include "Action")
-      return vis._data.filter(d => !d.genres.includes("Indie") && d.genres.includes("Action"));
+      return vis._data.filter(
+        (d) => !d.genres.includes("Indie") && d.genres.includes("Action")
+      );
     }
   }
 
@@ -54,7 +58,13 @@ class BubbleChart {
     // scale
     let x = d3
       .scaleLinear()
-      .domain([0, d3.max(filtered, (d) => d.price) || 50])
+      .domain([
+        -15,
+        Math.min(
+          d3.max(filtered, (d) => d.price),
+          72
+        ),
+      ])
       .range([margin.left, width - margin.right]);
 
     const y = d3
@@ -167,14 +177,20 @@ class BubbleChart {
 
     let x = d3
       .scaleLinear()
-      .domain([0, 72])
-          // 0, d3.max(timeFiltered, (d) => d.price) || 50])
+      .domain([
+        -15,
+        Math.min(
+          72,
+          d3.max(timeFiltered, (d) => d.price)
+        ),
+      ])
+      // 0, d3.max(timeFiltered, (d) => d.price) || 50])
       .range([margin.left, width - margin.right]);
 
     const y = d3
       .scaleLinear()
       .domain([20, 100])
-          // 0, d3.max(timeFiltered, (d) => d.positive) || 100])
+      // 0, d3.max(timeFiltered, (d) => d.positive) || 100])
       .range([height - margin.bottom, margin.top]);
 
     vis.xAxis.transition().duration(1000).call(d3.axisBottom(x));
