@@ -28,7 +28,7 @@ class BubbleChart {
 
   initVis() {
     let vis = this;
-    
+
     // transforming data
     vis._data.forEach((d) => {
       d.price = +d["price_initial (USD)"];
@@ -99,7 +99,7 @@ class BubbleChart {
       .join("circle")
       .attr("cx", (d) => x(d.price))
       .attr("cy", (d) => y(d.positive))
-      .attr("r", (d) => Math.sqrt(d.reviews + 1) * 0.1)
+      .attr("r", (d) => Math.sqrt(d.reviews + 1) * 0.06)
       .attr("fill", (d) => vis.color(d.positive))
       .attr("opacity", 0.7)
       .on("mouseover", (event, d) => {
@@ -167,12 +167,14 @@ class BubbleChart {
 
     let x = d3
       .scaleLinear()
-      .domain([0, d3.max(timeFiltered, (d) => d.price) || 50])
+      .domain([0, 72])
+          // 0, d3.max(timeFiltered, (d) => d.price) || 50])
       .range([margin.left, width - margin.right]);
 
     const y = d3
       .scaleLinear()
-      .domain([0, d3.max(timeFiltered, (d) => d.positive) || 100])
+      .domain([20, 100])
+          // 0, d3.max(timeFiltered, (d) => d.positive) || 100])
       .range([height - margin.bottom, margin.top]);
 
     vis.xAxis.transition().duration(1000).call(d3.axisBottom(x));
