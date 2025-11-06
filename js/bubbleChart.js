@@ -17,17 +17,20 @@ class BubbleChart {
   getFilteredData() {
     let vis = this;
 
+    let filtered = null;
     if (vis.filterType === "indie") {
       // Filter for Indie games (must include "Indie" genre)
-      return vis._data.filter(
+      filtered = vis._data.filter(
         (d) => d.genres.includes("Indie") && d.genres.includes("Action")
       );
     } else {
       // Filter for Studio games (must NOT include "Indie" genre, but include "Action")
-      return vis._data.filter(
+      filtered = vis._data.filter(
         (d) => !d.genres.includes("Indie") && d.genres.includes("Action")
       );
     }
+
+    return filtered.sort((a, b) => b.reviews - a.reviews);
   }
 
   initVis() {
