@@ -1,4 +1,4 @@
-let bubblechart, timeline, dropdown;
+let bubblechart, timeline, dropdown, radiussetter;
 
 loadData();
 
@@ -15,6 +15,10 @@ function loadData() {
     // init dropdown
     dropdown = new Dropdown(data, bubblechart, timeline);
     dropdown.initVis();
+
+    // init radius setter
+    radiussetter = new RadiusSetter(bubblechart);
+    radiussetter.initVis();
   });
 }
 
