@@ -5,98 +5,7 @@
     <title>Steam Games Visualization</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
-    <!-- 🎮 Game style -->
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap');
-
-        body {
-            background-color: #0a0a0f;
-            color: #e0e0e0;
-            font-family: 'Orbitron', sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-            width: 920px;
-            margin: 40px auto;
-            background: rgba(20, 20, 40, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.1);
-            padding: 30px 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        h2 {
-            font-size: 26px;
-            color: #00fff7;
-            text-shadow: 0 0 10px #00fff7, 0 0 20px #7a00ff;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-        }
-
-        /* Heading */
-        h2:hover {
-            text-shadow: 0 0 20px #00fff7, 0 0 30px #ff007f, 0 0 40px #7a00ff;
-            transform: scale(1.02);
-        }
-
-        p.subtitle {
-            font-size: 13px;
-            color: #aaa;
-            margin-top: -10px;
-            margin-bottom: 20px;
-        }
-
-        svg {
-            display: block;
-            margin: auto;
-            background: radial-gradient(circle at center, #151528 0%, #0a0a0f 100%);
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
-        }
-
-        .tooltip {
-            position: absolute;
-            background: rgba(10, 10, 20, 0.9);
-            border: 1px solid rgba(0, 255, 255, 0.4);
-            color: #fff;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        }
-
-        .tooltip strong {
-            color: #00fff7;
-        }
-
-        #timeline {
-            margin-top: 20px;
-        }
-
-        button {
-            background: linear-gradient(90deg, #ff007f, #00fff7);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 14px;
-            margin: 5px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
@@ -108,7 +17,11 @@
     </p>
 
     <div id="chart-area">
-        <svg width="900" height="550"></svg>
+        <div id="bubbleChartFlex">        
+            <svg width="900" height="550"></svg>
+            <div id="radiusSetter"></div>
+        </div>
+
         <div class="tooltip"></div>
         <div id="timeline"></div>
     </div>
@@ -119,6 +32,6 @@
 <script src="js/bubbleChart.js"></script>
 <script src="js/timeline.js"></script>
 <script src="js/dropdown.js"></script>
-
+<script src="js/radiusSetter.js"></script>
 </body>
 </html>
