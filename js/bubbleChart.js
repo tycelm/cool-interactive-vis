@@ -7,7 +7,7 @@ const tooltip = d3.select(".tooltip");
 class BubbleChart {
   constructor(data) {
     this._data = data;
-    this.filterType = "indie"; // default to indie
+    this.filterType = "indie";
   }
 
   setFilter(type) {
@@ -19,18 +19,29 @@ class BubbleChart {
 
     let filtered = null;
     if (vis.filterType === "indie") {
-      // Filter for Indie games (must include "Indie" genre)
-      filtered = vis._data.filter(
-        (d) => d.genres.includes("Indie") && d.genres.includes("Action")
-      );
+      // Filter for Indie games (must include "Indie" and "Action" genres)
+      filtered = vis._data.filter(d => {
+        return d.genres.includes("Indie") && d.genres.includes("Action");
+      });
     } else {
-      // Filter for Studio games (must NOT include "Indie" genre, but include "Action")
-      filtered = vis._data.filter(
-        (d) => !d.genres.includes("Indie") && d.genres.includes("Action")
-      );
+      // Filter for Studio games (must NOT include "Indie" but include "Action")
+      filtered = vis._data.filter(d => {
+        return !d.genres.includes("Indie") && d.genres.includes("Action");
+      });
     }
 
     return filtered.sort((a, b) => b.reviews - a.reviews);
+  }
+
+  getColorScale() {
+    let vis = this;
+    // Indie: dramatic purple-to-cyan with more color stops, Studio: viridis
+    if (vis.filterType === "indie") {
+      // Much darker purple to very bright cyan - stronger contrast
+      return d3.scaleSequential(d3.interpolateRgb("#2d0052", "#00ffff")).domain([20, 100]);
+    } else {
+      return d3.scaleSequential(d3.interpolateViridis).domain([0, 100]);
+    }
   }
 
   initVis() {
@@ -54,9 +65,11 @@ class BubbleChart {
         : [];
     });
 
-    // filter based on dropdown selection
+    // filter based on selection
     const filtered = vis.getFilteredData();
     console.log("Filtered rows:", filtered.length);
+
+    vis.color = vis.getColorScale();
 
     // scale
     let x = d3
@@ -74,8 +87,6 @@ class BubbleChart {
       .scaleLinear()
       .domain([0, d3.max(filtered, (d) => d.positive) || 100])
       .range([height - margin.bottom, margin.top]);
-
-    vis.color = d3.scaleSequential(d3.interpolateViridis).domain([0, 100]);
 
     // axis
     vis.xAxis = svg
@@ -114,12 +125,15 @@ class BubbleChart {
       .attr("cy", (d) => y(d.positive))
       .attr("r", (d) => Math.sqrt(d.reviews + 1) * 0.06)
       .attr("fill", (d) => vis.color(d.positive))
-      .attr("opacity", 0.7)
+      .attr("opacity", 0.8)
+      .style("filter", "drop-shadow(0 0 8px rgba(100, 150, 255, 0.6))")
       .on("mouseover", (event, d) => {
+        d3.select(event.currentTarget)
+          .style("filter", "drop-shadow(0 0 12px rgba(100, 150, 255, 0.9))");
         tooltip
           .style("opacity", 1)
           .html(
-            `<strong>${d.name}</strong><br>Price: $${d.price}<br>Positive: ${d.positive}%<br>Reviews: ${d.reviews}`
+            `<strong>${d.name}</strong><br>Price: ${d.price}<br>Positive: ${d.positive}%<br>Reviews: ${d.reviews}`
           )
           .style("left", event.pageX + 10 + "px")
           .style("top", event.pageY - 28 + "px");
@@ -129,13 +143,39 @@ class BubbleChart {
           .style("left", event.pageX + 10 + "px")
           .style("top", event.pageY - 28 + "px");
       })
-      .on("mouseout", () => {
+      .on("mouseout", (event) => {
+        d3.select(event.currentTarget)
+          .style("filter", "drop-shadow(0 0 8px rgba(100, 150, 255, 0.6))");
         tooltip.style("opacity", 0);
       });
 
-    // color
-    const defs = svg.append("defs");
-    const gradient = defs
+    // color legend
+    vis.legendGradient = svg.append("defs");
+    vis.updateLegend();
+
+    vis.legendRect = svg
+      .append("rect")
+      .attr("x", width / 2 - 100)
+      .attr("y", height - 20)
+      .attr("width", 200)
+      .attr("height", 10);
+
+    svg
+      .append("text")
+      .attr("x", width / 2)
+      .attr("y", height - 25)
+      .attr("text-anchor", "middle")
+      .attr("font-size", "10px")
+      .attr("fill", "#fff")
+      .text("Positive Percentual (%)");
+  }
+
+  updateLegend() {
+    let vis = this;
+    
+    vis.legendGradient.selectAll("*").remove();
+    
+    const gradient = vis.legendGradient
       .append("linearGradient")
       .attr("id", "color-gradient")
       .attr("x1", "0%")
@@ -148,26 +188,16 @@ class BubbleChart {
         .attr("stop-color", vis.color(p));
     });
 
-    svg
-      .append("rect")
-      .attr("x", width / 2 - 100)
-      .attr("y", height - 20)
-      .attr("width", 200)
-      .attr("height", 10)
-      .style("fill", "url(#color-gradient)");
-
-    svg
-      .append("text")
-      .attr("x", width / 2)
-      .attr("y", height - 25)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "10px")
-      .attr("fill", "#fff")
-      .text("Positive Percentual (%)");
+    if (vis.legendRect) {
+      vis.legendRect.style("fill", "url(#color-gradient)");
+    }
   }
 
   updateVis(timeDomain) {
     let vis = this;
+
+    vis.color = vis.getColorScale();
+    vis.updateLegend();
 
     const filtered = vis.getFilteredData();
 
@@ -187,13 +217,11 @@ class BubbleChart {
           d3.max(timeFiltered, (d) => d.price)
         ),
       ])
-      // 0, d3.max(timeFiltered, (d) => d.price) || 50])
       .range([margin.left, width - margin.right]);
 
     const y = d3
       .scaleLinear()
       .domain([20, 100])
-      // 0, d3.max(timeFiltered, (d) => d.positive) || 100])
       .range([height - margin.bottom, margin.top]);
 
     vis.xAxis.transition().duration(1000).call(d3.axisBottom(x));
@@ -204,19 +232,24 @@ class BubbleChart {
 
     circles
       .join("circle")
+      .transition()
+      .duration(1000)
       .attr("cx", (d) => x(d.price))
       .attr("cy", (d) => y(d.positive))
       .attr("r", (d) => Math.sqrt(d.reviews + 1) * 0.1)
       .attr("fill", (d) => vis.color(d.positive))
-      .attr("opacity", 0.7);
+      .attr("opacity", 0.8)
+      .style("filter", "drop-shadow(0 0 8px rgba(100, 150, 255, 0.6))");
 
     svg
       .selectAll("circle")
       .on("mouseover", (event, d) => {
+        d3.select(event.currentTarget)
+          .style("filter", "drop-shadow(0 0 12px rgba(100, 150, 255, 0.9))");
         tooltip
           .style("opacity", 1)
           .html(
-            `<strong>${d.name}</strong><br>Price: $${d.price}<br>Positive: ${d.positive}%<br>Reviews: ${d.reviews}`
+            `<strong>${d.name}</strong><br>Price: ${d.price}<br>Positive: ${d.positive}%<br>Reviews: ${d.reviews}`
           )
           .style("left", event.pageX + 10 + "px")
           .style("top", event.pageY - 28 + "px");
@@ -226,6 +259,10 @@ class BubbleChart {
           .style("left", event.pageX + 10 + "px")
           .style("top", event.pageY - 28 + "px");
       })
-      .on("mouseout", () => tooltip.style("opacity", 0));
+      .on("mouseout", (event) => {
+        d3.select(event.currentTarget)
+          .style("filter", "drop-shadow(0 0 8px rgba(100, 150, 255, 0.6))");
+        tooltip.style("opacity", 0);
+      });
   }
 }
