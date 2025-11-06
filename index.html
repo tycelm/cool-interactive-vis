@@ -5,13 +5,44 @@
     <title>Steam Games Visualization</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            background-color: #121212;
+            color: #eee;
+            font-family: sans-serif;
+            text-align: center;
+        }
+        .container {
+            width: 920px;
+            margin: auto;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0,0,0,0.8);
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+        }
+        svg { display: block; margin: auto; }
+        p.subtitle {
+            font-size: 13px;
+            color: #ccc;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
-
-    <h2>Price vs Positive Percentual of Action Games (Indie VS Studio)</h2>
-
+    <h2>Price vs Positive Rating (%) of Action Games (Indie vs Studio)</h2>
+    <p class="subtitle">
+        Each bubble represents a game. Size = number of reviews, color = positive rating (%).
+        Source: SteamSpy dataset (2024)
+    </p>
     <div id="chart-area">
         <svg width="900" height="550"></svg>
         <div class="tooltip"></div>
@@ -19,16 +50,10 @@
     </div>
 </div>
 
-
-
-
-<!-- Load JS libraries -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
-<!-- Visualization objects -->
 <script src="js/main.js"></script>
 <script src="js/bubbleChart.js"></script>
 <script src="js/timeline.js"></script>
 <script src="js/dropdown.js"></script>
+
 </body>
 </html>
