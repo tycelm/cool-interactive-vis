@@ -28,6 +28,19 @@ class BubbleChart {
     return filtered.sort((a, b) => b.reviews - a.reviews);
   }
 
+  getColorScale() {
+    let vis = this;
+    // Indie: dramatic purple-to-cyan with more color stops, Studio: viridis
+    if (vis.filterType === "indie") {
+      // Much darker purple to very bright cyan - stronger contrast
+      return d3
+        .scaleSequential(d3.interpolateRgb("#2d0052", "#00ffff"))
+        .domain([20, 100]);
+    } else {
+      return d3.scaleSequential(d3.interpolateViridis).domain([0, 100]);
+    }
+  }
+
   initVis() {
     let vis = this;
 
@@ -46,6 +59,7 @@ class BubbleChart {
         : [];
     });
 
+    // filter based on selection
     const filtered = vis.getFilteredData();
 
     // 尺度
