@@ -8,10 +8,12 @@ class BubbleChart {
   constructor(data) {
     this._data = data;
     this.filterType = "indie";
+    this.selectedGenres = ["Action"];
   }
 
-  setFilter(type) {
+  setFilter(type, genres) {
     this.filterType = type;
+    this.selectedGenres = genres;
   }
 
   getFilteredData() {
@@ -19,13 +21,39 @@ class BubbleChart {
     let filtered = vis._data
       .filter((d) => d.genres.includes("Action"))
       .filter((d) => d.reviews >= 500);
+
     if (vis.filterType === "indie") {
-      filtered = filtered.filter((d) => d.genres.includes("Indie"));
+      // Filter for Indie games (must include "Indie" genre AND all selected genres)
+      filtered = filtered.filter((d) => {
+        return (
+          d.genres.includes("Indie") &&
+          vis.selectedGenres.every((genre) => d.genres.includes(genre))
+        );
+      });
     } else {
-      filtered = filtered.filter((d) => !d.genres.includes("Indie"));
+      // Filter for Studio games (must NOT include "Indie" genre, but include all selected genres)
+      filtered = filtered.filter((d) => {
+        return (
+          !d.genres.includes("Indie") &&
+          vis.selectedGenres.every((genre) => d.genres.includes(genre))
+        );
+      });
     }
     // 小气泡在上层
     return filtered.sort((a, b) => b.reviews - a.reviews);
+  }
+
+  getColorScale() {
+    let vis = this;
+    // Indie: dramatic purple-to-cyan with more color stops, Studio: viridis
+    if (vis.filterType === "indie") {
+      // Much darker purple to very bright cyan - stronger contrast
+      return d3
+        .scaleSequential(d3.interpolateRgb("#2d0052", "#00ffff"))
+        .domain([20, 100]);
+    } else {
+      return d3.scaleSequential(d3.interpolateViridis).domain([0, 100]);
+    }
   }
 
   initVis() {
@@ -46,6 +74,7 @@ class BubbleChart {
         : [];
     });
 
+    // filter based on selection
     const filtered = vis.getFilteredData();
 
     // 尺度
@@ -131,12 +160,12 @@ class BubbleChart {
                  Positive: ${d.positive}%<br>
                  Reviews: ${d.reviews}`
           )
-          .style("left", event.pageX - 70 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mousemove", (event) => {
         tooltip
-          .style("left", event.pageX - 70 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mouseout", (event) => {
@@ -294,12 +323,12 @@ class BubbleChart {
                  Positive: ${d.positive}%<br>
                  Reviews: ${d.reviews}`
           )
-          .style("left", event.pageX + 10 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mousemove", (event) => {
         tooltip
-          .style("left", event.pageX + 10 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mouseout", (event) => {
