@@ -18,10 +18,6 @@ function loadData() {
     bubblechart.initVis();
     timeline.initVis();
 
-    // init dropdown
-    dropdown = new Dropdown(data, bubblechart, timeline);
-    dropdown.initVis();
-
     // init radius setter
     radiussetter = new RadiusSetter(bubblechart);
     radiussetter.initVis();

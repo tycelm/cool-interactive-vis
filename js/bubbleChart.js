@@ -21,9 +21,10 @@ class BubbleChart {
     let filtered = vis._data
       .filter((d) => d.genres.includes("Action"))
       .filter((d) => d.reviews >= 500);
+
     if (vis.filterType === "indie") {
       // Filter for Indie games (must include "Indie" genre AND all selected genres)
-      filtered = vis._data.filter((d) => {
+      filtered = filtered.filter((d) => {
         return (
           d.genres.includes("Indie") &&
           vis.selectedGenres.every((genre) => d.genres.includes(genre))
@@ -31,7 +32,7 @@ class BubbleChart {
       });
     } else {
       // Filter for Studio games (must NOT include "Indie" genre, but include all selected genres)
-      filtered = vis._data.filter((d) => {
+      filtered = filtered.filter((d) => {
         return (
           !d.genres.includes("Indie") &&
           vis.selectedGenres.every((genre) => d.genres.includes(genre))
