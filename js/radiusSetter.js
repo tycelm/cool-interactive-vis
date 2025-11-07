@@ -1,108 +1,86 @@
-// this component lets the user determine the radius range they want to view in
-const rsHeight = 300;
-const rsWidth = 500;
-const rsMargin = { top: 20, right: 40, bottom: 20, left: 40 };
+const rsHeight = 140;
+const rsWidth = 260;
+const rsMargin = { top: 10, right: 10, bottom: 10, left: 10 };
 
 class RadiusSetter {
-  constructor(bubbleChart) {
-    this.bubbleChart = bubbleChart;
-  }
+    constructor(bubbleChart) {
+        this.bubbleChart = bubbleChart;
+    }
 
-  initVis() {
-    let vis = this;
+    initVis() {
+        let vis = this;
 
-    vis.svg = d3
-      .select("#radiusSetter")
-      .append("svg")
-      .attr("width", rsWidth + rsMargin.left + rsMargin.right)
-      .attr("height", rsHeight)
-      .append("g")
-      .attr(
-        "transform",
-        "translate(" + rsMargin.left / 2 + "," + rsMargin.top * 2 + ")"
-      );
+        const container = d3.select("#radiusSetter");
 
-    vis.svg.append("text").attr("fill", "#fff").text("Choose min radius size");
+        container
+            .append("h3")
+            .text("Choose Min Radius Size")
+            .style("color", "#fff")
+            .style("font-family", "'Orbitron', sans-serif")
+            .style("font-size", "14px")
+            .style("margin", "0 0 10px 0")
+            .style("text-align", "center");
 
-    const circleY = 100;
+        container
+            .style("background", "rgba(10, 20, 40, 0.8)")
+            .style("border-radius", "16px")
+            .style("padding", "16px 18px")
+            .style("box-shadow", "0 0 18px rgba(0, 255, 255, 0.12)");
 
-    const centerX = rsWidth / 2;
+        const svg = container
+            .append("svg")
+            .attr("width", rsWidth + rsMargin.left + rsMargin.right)
+            .attr("height", rsHeight + rsMargin.top + rsMargin.bottom);
 
-    // Circle positions
-    const circle1X = centerX;
+        vis.svg = svg
+            .append("g")
+            .attr("transform", "translate(" + rsMargin.left + "," + rsMargin.top + ")");
 
-    const radiusMin = Math.sqrt(500 + 1) * 0.06;
-    const radiusMax = Math.sqrt(50000 + 1) * 0.06;
+        const centerX = rsWidth / 2;
+        const circleY = 45;
 
-    const sliderStartY = circleY + radiusMax + 20;
+        const radiusMin = Math.sqrt(500 + 1) * 0.06;
+        const radiusMax = Math.sqrt(50000 + 1) * 0.06;
 
-    vis.circle1 = vis.svg
-      .append("circle")
-      .attr("cx", circle1X)
-      .attr("cy", circleY)
-      .attr("r", radiusMin)
-      .style("fill", "#058dc7");
+        vis.circle1 = vis.svg
+            .append("circle")
+            .attr("cx", centerX)
+            .attr("cy", circleY)
+            .attr("r", radiusMin)
+            .style("fill", "#00bfff")
+            .style("opacity", 0.9)
+            .style("filter", "drop-shadow(0 0 10px rgba(0,255,255,0.7))");
 
-    // vis.svg
-    //   .append("text")
-    //   .attr("fill", "#fff")
-    //   .attr("x", circle2X - 20)
-    //   .text("Max:");
+        const sliderY = circleY + radiusMax + 12;
 
-    // vis.circle2 = vis.svg
-    //   .append("circle")
-    //   .attr("cx", circle2X)
-    //   .attr("cy", circleY)
-    //   .attr("r", radiusMax)
-    //   .style("fill", "#058dc7");
+        // slider
+        vis.svg
+            .append("foreignObject")
+            .attr("x", centerX - 80)
+            .attr("y", sliderY)
+            .attr("width", 160)
+            .attr("height", 40)
+            .append("xhtml:input")
+            .attr("type", "range")
+            .attr("min", radiusMin)
+            .attr("max", radiusMax)
+            .attr("value", radiusMin)
+            .on("input", function () {
+                const newRadius = +this.value;
+                vis.circle1.attr("r", newRadius);
+                vis.updateBubble();
+            });
+    }
 
-    // Slider 1
-    vis.svg
-      .append("foreignObject")
-      .attr("x", circle1X - 70)
-      .attr("y", sliderStartY)
-      .attr("width", 150)
-      .attr("height", 50)
-      .append("xhtml:input")
-      .attr("type", "range")
-      .attr("min", radiusMin)
-      .attr("max", radiusMax)
-      .attr("value", radiusMin)
-      .on("input", function () {
-        const newRadius = +this.value;
-        vis.circle1.attr("r", newRadius);
+    updateBubble() {
+        let vis = this;
 
-        vis.updateBubble();
-      });
+        const radiusMax = Math.sqrt(1279700 + 1) * 0.06;
+        const rMin = +vis.circle1.attr("r"); // slider 设定的最小半径
+        const radiusExtent = [rMin, radiusMax];
 
-    // // Slider 2
-    // vis.svg
-    //   .append("foreignObject")
-    //   .attr("x", circle2X - 70)
-    //   .attr("y", sliderStartY)
-    //   .attr("width", 150)
-    //   .attr("height", 50)
-    //   .append("xhtml:input")
-    //   .attr("type", "range")
-    //   .attr("min", radiusMin)
-    //   .attr("max", radiusMax)
-    //   .attr("value", radiusMax)
-    //   .on("input", function () {
-    //     const newRadius = +this.value;
-    //     vis.circle2.attr("r", newRadius);
+        vis.bubbleChart.setRadiusExtent(radiusExtent);
+        vis.bubbleChart.updateVisRadius(radiusExtent);
 
-    //     vis.updateBubble();
-    //   });
-  }
-
-  updateBubble() {
-    let vis = this;
-
-    const radiusMax = Math.sqrt(1279700 + 1) * 0.06;
-
-    const rMin = +vis.circle1.attr("r"); // min radius from slider
-    const radiusExtent = [rMin, radiusMax];
-
-    vis.bubbleChart.updateVisRadius(radiusExtent);
-  }
+    }
 }
