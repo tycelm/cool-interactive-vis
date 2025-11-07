@@ -4,8 +4,8 @@ body {
     text-align: center;
     background: #161920;
 }
-h2{
-     color: white;
+h2 {
+    color: white;
 }
 svg {
     background: #1f2733;
@@ -28,9 +28,44 @@ circle:hover {
     opacity: 0;
     transition: opacity 0.2s;
 }
-
 .brush .extent {
   stroke: #fff;
   fill-opacity: .125;
   shape-rendering: crispEdges;
+}
+
+/* ===== Dropdown & Genre Filter Styling ===== */
+#filter-controls {
+  margin: 20px auto 30px;
+  padding: 15px;
+  background: #1f2733;
+  border-radius: 12px;
+  width: fit-content;
+  text-align: left;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+.dropdown-label {
+  font-weight: 600;
+  margin-right: 10px;
+}
+
+#categoryDropdown {
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: none;
+  background: #283240;
+  color: white;
+  font-size: 14px;
+}
+
+.genre-container {
+  margin-top: 10px;
+}
+
+.genre-label {
+  display: inline-block;
+  margin-right: 12px;
+  font-size: 14px;
 }

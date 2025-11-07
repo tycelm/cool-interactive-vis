@@ -8,10 +8,12 @@ class BubbleChart {
   constructor(data) {
     this._data = data;
     this.filterType = "indie";
+    this.selectedGenres = ["Action"];
   }
 
-  setFilter(type) {
+  setFilter(type, genres) {
     this.filterType = type;
+    this.selectedGenres = genres;
   }
 
   getFilteredData() {
@@ -19,14 +21,16 @@ class BubbleChart {
 
     let filtered = null;
     if (vis.filterType === "indie") {
-      // Filter for Indie games (must include "Indie" and "Action" genres)
+      // Filter for Indie games (must include "Indie" genre AND all selected genres)
       filtered = vis._data.filter(d => {
-        return d.genres.includes("Indie") && d.genres.includes("Action");
+        return d.genres.includes("Indie") && 
+               vis.selectedGenres.every(genre => d.genres.includes(genre));
       });
     } else {
-      // Filter for Studio games (must NOT include "Indie" but include "Action")
+      // Filter for Studio games (must NOT include "Indie" genre, but include all selected genres)
       filtered = vis._data.filter(d => {
-        return !d.genres.includes("Indie") && d.genres.includes("Action");
+        return !d.genres.includes("Indie") && 
+               vis.selectedGenres.every(genre => d.genres.includes(genre));
       });
     }
 
