@@ -39,69 +39,69 @@ circle:hover {
     stroke-width: 1.5px;
 }
  p.subtitle {
-            font-size: 13px;
-            color: #aaa;
-            margin-top: -10px;
-            margin-bottom: 20px;
-        }
+    font-size: 13px;
+    color: #aaa;
+    margin-top: -10px;
+    margin-bottom: 20px;
+}
 
-        svg {
-            display: block;
-            margin: auto;
-            background: radial-gradient(circle at center, #151528 0%, #0a0a0f 100%);
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
-        }
+svg {
+    display: block;
+    margin: auto;
+    background: radial-gradient(circle at center, #151528 0%, #0a0a0f 100%);
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.05);
+}
 
-        .tooltip {
-            position: absolute;
-            background: rgba(10, 10, 20, 0.9);
-            border: 1px solid rgba(0, 255, 255, 0.4);
-            color: #fff;
-            padding: 8px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.2s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        }
+.tooltip {
+    position: absolute;
+    background: rgba(10, 10, 20, 0.9);
+    border: 1px solid rgba(0, 255, 255, 0.4);
+    color: #fff;
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
 
-        .tooltip strong {
-            color: #00fff7;
-        }
+.tooltip strong {
+    color: #00fff7;
+}
 
-        #timeline {
-            margin-top: 20px;
-        }
+#timeline {
+    margin-top: 20px;
+}
 
-                button {
-            background: linear-gradient(90deg, #ff007f, #00fff7);
-            color: #fff;
-            border: none;
-            border-radius: 6px;
-            padding: 8px 14px;
-            margin: 5px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
-        }
+button {
+    background: linear-gradient(90deg, #ff007f, #00fff7);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 14px;
+    margin: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
 
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
-        }
-        
+button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.6);
+}
+
 #bubbleChartFlex {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
     padding-bottom: 1rem;
 }
 
 .brush .extent {
-  stroke: #fff;
-  fill-opacity: .125;
-  shape-rendering: crispEdges;
+    stroke: #fff;
+    fill-opacity: .125;
+    shape-rendering: crispEdges;
 }
