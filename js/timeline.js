@@ -5,30 +5,38 @@ const timelineMargin = { top: 20, right: 40, bottom: 20, left: 40 };
 class Timeline {
   constructor(data) {
     this._data = data;
-    this.filterType = "indie"; // default to indie
+    this.filterType = "indie";
+    this.selectedGenres = ["Action"];
     this.svg = null;
   }
 
-  setFilter(type) {
+  setFilter(type, genres) {
     this.filterType = type;
+    this.selectedGenres = genres;
   }
 
   getFilteredData() {
     let vis = this;
     
     if (vis.filterType === "indie") {
-      // Filter for Indie games (must include "Indie" genre)
-      return vis._data.filter(d => d.genres.includes("Indie") && d.genres.includes("Action"));
+      // Filter for Indie games (must include "Indie" genre AND all selected genres)
+      return vis._data.filter(d => {
+        return d.genres.includes("Indie") && 
+               vis.selectedGenres.every(genre => d.genres.includes(genre));
+      });
     } else {
-      // Filter for Studio games (must NOT include "Indie" genre, but include "Action")
-      return vis._data.filter(d => !d.genres.includes("Indie") && d.genres.includes("Action"));
+      // Filter for Studio games (must NOT include "Indie" genre, but include all selected genres)
+      return vis._data.filter(d => {
+        return !d.genres.includes("Indie") && 
+               vis.selectedGenres.every(genre => d.genres.includes(genre));
+      });
     }
   }
 
   initVis() {
     let vis = this;
 
-    // filter based on dropdown selection
+    // filter based on selection
     const filtered = vis.getFilteredData();
 
     const yearlyCounts = d3.rollup(
@@ -150,7 +158,7 @@ class Timeline {
   updateVis() {
     let vis = this;
 
-    // filter based on dropdown selection
+    // filter based on selection
     const filtered = vis.getFilteredData();
 
     const yearlyCounts = d3.rollup(
