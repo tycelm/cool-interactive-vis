@@ -160,12 +160,12 @@ class BubbleChart {
                  Positive: ${d.positive}%<br>
                  Reviews: ${d.reviews}`
           )
-          .style("left", event.pageX - 70 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mousemove", (event) => {
         tooltip
-          .style("left", event.pageX - 70 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mouseout", (event) => {
@@ -323,12 +323,12 @@ class BubbleChart {
                  Positive: ${d.positive}%<br>
                  Reviews: ${d.reviews}`
           )
-          .style("left", event.pageX + 10 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mousemove", (event) => {
         tooltip
-          .style("left", event.pageX + 10 + "px")
+          .style("left", event.pageX - 400 + "px")
           .style("top", event.pageY - 28 + "px");
       })
       .on("mouseout", (event) => {
