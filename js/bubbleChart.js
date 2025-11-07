@@ -8,10 +8,12 @@ class BubbleChart {
   constructor(data) {
     this._data = data;
     this.filterType = "indie";
+    this.selectedGenres = ["Action"];
   }
 
-  setFilter(type) {
+  setFilter(type, genres) {
     this.filterType = type;
+    this.selectedGenres = genres;
   }
 
   getFilteredData() {
@@ -20,9 +22,21 @@ class BubbleChart {
       .filter((d) => d.genres.includes("Action"))
       .filter((d) => d.reviews >= 500);
     if (vis.filterType === "indie") {
-      filtered = filtered.filter((d) => d.genres.includes("Indie"));
+      // Filter for Indie games (must include "Indie" genre AND all selected genres)
+      filtered = vis._data.filter((d) => {
+        return (
+          d.genres.includes("Indie") &&
+          vis.selectedGenres.every((genre) => d.genres.includes(genre))
+        );
+      });
     } else {
-      filtered = filtered.filter((d) => !d.genres.includes("Indie"));
+      // Filter for Studio games (must NOT include "Indie" genre, but include all selected genres)
+      filtered = vis._data.filter((d) => {
+        return (
+          !d.genres.includes("Indie") &&
+          vis.selectedGenres.every((genre) => d.genres.includes(genre))
+        );
+      });
     }
     // 小气泡在上层
     return filtered.sort((a, b) => b.reviews - a.reviews);
