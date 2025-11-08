@@ -9,11 +9,7 @@ class BubbleChart {
         this._data = data;
         this.filterType = "indie";
         this.selectedGenres = ["Action"];
-
-        this.radiusExtent = [
-            Math.sqrt(500 + 1) * 0.06,
-            Math.sqrt(1279700 + 1) * 0.06,
-        ];
+        this.radiusExtent = [Math.sqrt(500 + 1) * 0.06, Math.sqrt(1279700 + 1) * 0.06];
         this.timeDomain = [2006, 2025];
     }
 
@@ -30,7 +26,6 @@ class BubbleChart {
         this.timeDomain = domain;
     }
 
-    // filtering data
     getFilteredData() {
         let vis = this;
         let filtered = vis._data
@@ -58,9 +53,7 @@ class BubbleChart {
     getColorScale() {
         let vis = this;
         if (vis.filterType === "indie") {
-            return d3
-                .scaleSequential(d3.interpolateRgb("#2d0052", "#00ffff"))
-                .domain([20, 100]);
+            return d3.scaleSequential(d3.interpolateRgb("#2d0052", "#00ffff")).domain([20, 100]);
         } else {
             return d3.scaleSequential(d3.interpolateViridis).domain([0, 100]);
         }
@@ -75,9 +68,7 @@ class BubbleChart {
             d.reviews = +d.total_reviews;
             const date = new Date(d.release_date);
             d.year = date.getFullYear();
-            d.genres = d.genres
-                ? d.genres.replace(/[\[\]']/g, "").split(",").map((g) => g.trim())
-                : [];
+            d.genres = d.genres ? d.genres.replace(/[\[\]']/g, "").split(",").map((g) => g.trim()) : [];
         });
 
         const filtered = vis.getFilteredData();
@@ -87,22 +78,12 @@ class BubbleChart {
         vis.gAxes = svg.append("g").attr("class", "axes-layer");
 
         const priceExtent = d3.extent(filtered, (d) => d.price);
-        const x = d3
-            .scaleLinear()
-            .domain([Math.max(0, priceExtent[0]), priceExtent[1]])
-            .nice()
-            .range([margin.left, width - margin.right]);
-
-        const y = d3
-            .scaleLinear()
-            .domain([0, 100])
-            .nice()
-            .range([height - margin.bottom, margin.top]);
-
+        const x = d3.scaleLinear().domain([Math.max(0, priceExtent[0]), priceExtent[1]]).nice().range([margin.left, width - margin.right]);
+        const y = d3.scaleLinear().domain([0, 100]).nice().range([height - margin.bottom, margin.top]);
         const neonCandy = ["#ff007f", "#ff6f00", "#d4ff00", "#00fff7", "#7a00ff"];
         vis.color = d3.scaleLinear().domain([0, 25, 50, 75, 100]).range(neonCandy);
 
-        vis.gBubbles
+        const bubbles = vis.gBubbles
             .selectAll("circle")
             .data(filtered)
             .join("circle")
@@ -112,103 +93,71 @@ class BubbleChart {
             .attr("fill", (d) => vis.color(d.positive))
             .attr("stroke", "#222")
             .attr("stroke-width", 0.5)
-            .attr("opacity", 0.8)
-            .on("mouseover", (event, d) => {
+            .attr("opacity", 0.8);
+
+        bubbles.transition()
+            .duration(800)
+            .delay((d, i) => i * 3)
+            .attr("r", (d) => {
+                const radiusScale = d3.scaleSqrt()
+                    .domain(d3.extent(filtered, (d) => d.reviews))
+                    .range(vis.radiusExtent);
+                return radiusScale(d.reviews);
+            });
+
+        bubbles.on("mouseover", (event, d) => {
                 const circle = d3.select(event.currentTarget);
-                circle.attr("data-original-filter", circle.style("filter"));
-                circle
-                    .style("filter", "drop-shadow(0 0 8px white)")
-                    .attr("stroke-width", 1.5);
+                circle.style("filter", "drop-shadow(0 0 8px white)").attr("stroke-width", 1.5);
+
+                const circleBox = event.currentTarget.getBoundingClientRect();
+
+                const tooltipWidth = tooltip.node().offsetWidth;
+                const tooltipHeight = tooltip.node().offsetHeight;
+                const padding = 10;
+
+                const xPos = circleBox.left + circleBox.width / 2 - tooltipWidth / 2 + window.scrollX - 150;
+                const yPos = circleBox.top - tooltipHeight - padding + window.scrollY - 50;
+
                 tooltip
+                    .style("left", `${xPos}px`)
+                    .style("top", `${yPos}px`)
                     .style("opacity", 1)
                     .html(
                         `<strong>${d.name}</strong><br>
-                        Price: $${d.price}<br>
-                        Positive: ${d.positive}%<br>
-                        Reviews: ${d.reviews}`
-                    )
-                    .style("left", event.pageX + 12 + "px")
-                    .style("top", event.pageY - 24 + "px");
-            })
-            .on("mousemove", (event) => {
-                tooltip
-                    .style("left", event.pageX + 12 + "px")
-                    .style("top", event.pageY - 24 + "px");
+            Price: $${d.price}<br>
+            Positive: ${d.positive}%<br>
+            Reviews: ${d.reviews}`
+                    );
             })
             .on("mouseout", (event) => {
-                const circle = d3.select(event.currentTarget);
-                const originalFilter = circle.attr("data-original-filter");
-                circle
-                    .style("filter", originalFilter)
+                d3.select(event.currentTarget)
+                    .style("filter", "none")
                     .attr("stroke-width", 0.5);
-
                 tooltip.style("opacity", 0);
             });
 
-
-        vis.xAxis = vis.gAxes
-            .append("g")
-            .attr("transform", `translate(0,${height - margin.bottom})`)
-            .call(d3.axisBottom(x).tickFormat((d) => `$${d}`));
-
-        vis.gAxes
-            .append("text")
-            .attr("x", width / 2)
-            .attr("y", height - margin.bottom + 40)
-            .attr("fill", "#fff")
-            .attr("text-anchor", "middle")
-            .text("Price (USD)");
-
-        vis.yAxis = vis.gAxes
-            .append("g")
-            .attr("transform", `translate(${margin.left},0)`)
-            .call(d3.axisLeft(y));
-
-        vis.gAxes
-            .append("text")
-            .attr("x", -height / 2)
-            .attr("y", 30)
-            .attr("fill", "#fff")
-            .attr("text-anchor", "middle")
-            .attr("transform", "rotate(-90)")
-            .text("Positive Rating (%)");
-
+        vis.xAxis = vis.gAxes.append("g").attr("transform", `translate(0,${height - margin.bottom})`).call(d3.axisBottom(x).tickFormat((d) => `$${d}`));
+        vis.gAxes.append("text").attr("x", width / 2).attr("y", height - margin.bottom + 40).attr("fill", "#fff").attr("text-anchor", "middle").text("Price (USD)");
+        vis.yAxis = vis.gAxes.append("g").attr("transform", `translate(${margin.left},0)`).call(d3.axisLeft(y));
+        vis.gAxes.append("text").attr("x", -height / 2).attr("y", 30).attr("fill", "#fff").attr("text-anchor", "middle").attr("transform", "rotate(-90)").text("Positive Rating (%)");
         vis.gAxes.raise();
     }
 
     redrawBubbles() {
         let vis = this;
         const filtered = vis.getFilteredData();
-
-        const x = d3
-            .scaleLinear()
-            .domain([0, Math.min(72, d3.max(filtered, (d) => d.price))])
-            .range([margin.left, width - margin.right]);
-
-        const y = d3
-            .scaleLinear()
-            .domain([0, 100])
-            .range([height - margin.bottom, margin.top]);
-
-        const radiusScale = d3
-            .scaleSqrt()
-            .domain(d3.extent(filtered, (d) => d.reviews))
-            .range(vis.radiusExtent);
+        const x = d3.scaleLinear().domain([0, Math.min(72, d3.max(filtered, (d) => d.price))]).range([margin.left, width - margin.right]);
+        const y = d3.scaleLinear().domain([0, 100]).range([height - margin.bottom, margin.top]);
+        const radiusScale = d3.scaleSqrt().domain(d3.extent(filtered, (d) => d.reviews)).range(vis.radiusExtent);
 
         vis.xAxis.transition().duration(600).call(d3.axisBottom(x));
         vis.yAxis.transition().duration(600).call(d3.axisLeft(y));
 
         const circles = vis.gBubbles.selectAll("circle").data(filtered, (d) => d.name);
 
-        circles
-            .exit()
-            .transition()
-            .duration(400)
-            .attr("r", 0)
-            .remove();
+        circles.exit().transition().duration(400).attr("r", 0).remove();
 
-        circles
-            .enter()
+        circles.enter()
             .append("circle")
             .attr("cx", (d) => x(d.price))
             .attr("cy", (d) => y(d.positive))
@@ -225,6 +174,103 @@ class BubbleChart {
             .attr("r", (d) => radiusScale(d.reviews));
 
         vis.gAxes.raise();
+        svg.selectAll("circle").on("mouseover", (event, d) => {
+            const circle = d3.select(event.currentTarget);
+            circle.style("filter", "drop-shadow(0 0 8px white)").attr("stroke-width", 1.5);
+
+            const circleBox = event.currentTarget.getBoundingClientRect();
+
+            const tooltipWidth = tooltip.node().offsetWidth;
+            const tooltipHeight = tooltip.node().offsetHeight;
+            const padding = 10;
+
+            const xPos = circleBox.left + circleBox.width / 2 - tooltipWidth / 2 + window.scrollX - 150;
+            const yPos = circleBox.top - tooltipHeight - padding + window.scrollY - 50;
+
+            tooltip
+                .style("left", `${xPos}px`)
+                .style("top", `${yPos}px`)
+                .style("opacity", 1)
+                .html(
+                    `<strong>${d.name}</strong><br>
+            Price: $${d.price}<br>
+            Positive: ${d.positive}%<br>
+            Reviews: ${d.reviews}`
+                );
+        })
+            .on("mouseout", (event) => {
+                d3.select(event.currentTarget)
+                    .style("filter", "none")
+                    .attr("stroke-width", 0.5);
+                tooltip.style("opacity", 0);
+            });
+        // svg.selectAll("circle")
+        //     .on("mouseover", (event, d) => {
+        //         const circle = d3.select(event.currentTarget);
+        //         circle
+        //             .style("filter", "drop-shadow(0 0 8px white)")
+        //             .attr("stroke-width", 1.5);
+        //
+        //         const svgBox = svg.node().getBoundingClientRect();
+        //         const pageX = event.pageX;
+        //         const pageY = event.pageY;
+        //         const tW = tooltip.node().offsetWidth;
+        //         const tH = tooltip.node().offsetHeight;
+        //         const pad = 10;
+        //
+        //         let xPos = pageX - svgBox.left + window.scrollX + pad
+        //         - 10;
+        //         let yPos = pageY - svgBox.top + window.scrollY - tH
+        //             - pad - 20;
+        //
+        //         if (xPos + tW > svgBox.width + svgBox.left + window.scrollX - pad)
+        //             xPos = pageX - tW - pad;
+        //         if (xPos < svgBox.left + window.scrollX + pad)
+        //             xPos = svgBox.left + window.scrollX + pad;
+        //         if (yPos < svgBox.top + window.scrollY + pad)
+        //             yPos = pageY + pad;
+        //         if (yPos + tH > svgBox.bottom + window.scrollY - pad)
+        //             yPos = svgBox.bottom + window.scrollY - tH - pad;
+        //
+        //         tooltip
+        //             .style("opacity", 1)
+        //             .style("left", `${xPos}px`)
+        //             .style("top", `${yPos}px`)
+        //             .html(
+        //                 `<strong>${d.name}</strong><br>
+        //     Price: $${d.price}<br>
+        //     Positive: ${d.positive}%<br>
+        //     Reviews: ${d.reviews}`
+        //             );
+        //     })
+        //     .on("mousemove", (event) => {
+        //         const svgBox = svg.node().getBoundingClientRect();
+        //         const pageX = event.pageX;
+        //         const pageY = event.pageY;
+        //         const tW = tooltip.node().offsetWidth;
+        //         const tH = tooltip.node().offsetHeight;
+        //         const pad = 10;
+        //
+        //         let xPos = pageX - svgBox.left + window.scrollX + pad -5;
+        //         let yPos = pageY - svgBox.top + window.scrollY - tH - pad - 20;
+        //
+        //         if (xPos + tW > svgBox.width + svgBox.left + window.scrollX - pad)
+        //             xPos = pageX - tW - pad;
+        //         if (xPos < svgBox.left + window.scrollX + pad)
+        //             xPos = svgBox.left + window.scrollX + pad;
+        //         if (yPos < svgBox.top + window.scrollY + pad)
+        //             yPos = pageY + pad;
+        //         if (yPos + tH > svgBox.bottom + window.scrollY - pad)
+        //             yPos = svgBox.bottom + window.scrollY - tH - pad;
+        //
+        //         tooltip.style("left", `${xPos}px`).style("top", `${yPos}px`);
+        //     })
+        //     .on("mouseout", (event) => {
+        //         d3.select(event.currentTarget)
+        //             .style("filter", "none")
+        //             .attr("stroke-width", 0.5);
+        //         tooltip.style("opacity", 0);
+        //     });
     }
 
     updateVis(timeDomain) {
