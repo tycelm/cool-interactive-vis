@@ -79,7 +79,27 @@ class BubbleChart {
 
         const priceExtent = d3.extent(filtered, (d) => d.price);
         const x = d3.scaleLinear().domain([Math.max(0, priceExtent[0]), priceExtent[1]]).nice().range([margin.left, width - margin.right]);
-        const y = d3.scaleLinear().domain([0, 100]).nice().range([height - margin.bottom, margin.top]);
+        const y = d3.scaleLinear()
+            .domain([0, 100])
+            .nice()
+            .range([height - margin.bottom, margin.top]);
+
+        vis.gBackground.append("g")
+            .attr("class", "y-grid")
+            .attr("transform", `translate(${margin.left},0)`)
+            .call(
+                d3.axisLeft(y)
+                    .tickSize(- (width - margin.left - margin.right))
+                    .tickFormat("")
+            )
+            .selectAll("line")
+            .attr("stroke", "#aaa")
+            .attr("stroke-opacity", 0.15)
+            .attr("shape-rendering", "crispEdges");
+
+        vis.gBackground.select(".y-grid .domain").remove();
+
+
         const neonCandy = ["#ff007f", "#ff6f00", "#d4ff00", "#00fff7", "#7a00ff"];
         vis.color = d3.scaleLinear().domain([0, 25, 50, 75, 100]).range(neonCandy);
 
@@ -204,73 +224,6 @@ class BubbleChart {
                     .attr("stroke-width", 0.5);
                 tooltip.style("opacity", 0);
             });
-        // svg.selectAll("circle")
-        //     .on("mouseover", (event, d) => {
-        //         const circle = d3.select(event.currentTarget);
-        //         circle
-        //             .style("filter", "drop-shadow(0 0 8px white)")
-        //             .attr("stroke-width", 1.5);
-        //
-        //         const svgBox = svg.node().getBoundingClientRect();
-        //         const pageX = event.pageX;
-        //         const pageY = event.pageY;
-        //         const tW = tooltip.node().offsetWidth;
-        //         const tH = tooltip.node().offsetHeight;
-        //         const pad = 10;
-        //
-        //         let xPos = pageX - svgBox.left + window.scrollX + pad
-        //         - 10;
-        //         let yPos = pageY - svgBox.top + window.scrollY - tH
-        //             - pad - 20;
-        //
-        //         if (xPos + tW > svgBox.width + svgBox.left + window.scrollX - pad)
-        //             xPos = pageX - tW - pad;
-        //         if (xPos < svgBox.left + window.scrollX + pad)
-        //             xPos = svgBox.left + window.scrollX + pad;
-        //         if (yPos < svgBox.top + window.scrollY + pad)
-        //             yPos = pageY + pad;
-        //         if (yPos + tH > svgBox.bottom + window.scrollY - pad)
-        //             yPos = svgBox.bottom + window.scrollY - tH - pad;
-        //
-        //         tooltip
-        //             .style("opacity", 1)
-        //             .style("left", `${xPos}px`)
-        //             .style("top", `${yPos}px`)
-        //             .html(
-        //                 `<strong>${d.name}</strong><br>
-        //     Price: $${d.price}<br>
-        //     Positive: ${d.positive}%<br>
-        //     Reviews: ${d.reviews}`
-        //             );
-        //     })
-        //     .on("mousemove", (event) => {
-        //         const svgBox = svg.node().getBoundingClientRect();
-        //         const pageX = event.pageX;
-        //         const pageY = event.pageY;
-        //         const tW = tooltip.node().offsetWidth;
-        //         const tH = tooltip.node().offsetHeight;
-        //         const pad = 10;
-        //
-        //         let xPos = pageX - svgBox.left + window.scrollX + pad -5;
-        //         let yPos = pageY - svgBox.top + window.scrollY - tH - pad - 20;
-        //
-        //         if (xPos + tW > svgBox.width + svgBox.left + window.scrollX - pad)
-        //             xPos = pageX - tW - pad;
-        //         if (xPos < svgBox.left + window.scrollX + pad)
-        //             xPos = svgBox.left + window.scrollX + pad;
-        //         if (yPos < svgBox.top + window.scrollY + pad)
-        //             yPos = pageY + pad;
-        //         if (yPos + tH > svgBox.bottom + window.scrollY - pad)
-        //             yPos = svgBox.bottom + window.scrollY - tH - pad;
-        //
-        //         tooltip.style("left", `${xPos}px`).style("top", `${yPos}px`);
-        //     })
-        //     .on("mouseout", (event) => {
-        //         d3.select(event.currentTarget)
-        //             .style("filter", "none")
-        //             .attr("stroke-width", 0.5);
-        //         tooltip.style("opacity", 0);
-        //     });
     }
 
     updateVis(timeDomain) {
