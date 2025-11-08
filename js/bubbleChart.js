@@ -11,6 +11,11 @@ class BubbleChart {
         this.selectedGenres = ["Action"];
         this.radiusExtent = [Math.sqrt(500 + 1) * 0.06, Math.sqrt(1279700 + 1) * 0.06];
         this.timeDomain = [2006, 2025];
+        this.compareMode = false;
+    }
+
+    setCompareMode(enabled) {
+        this.compareMode = enabled;
     }
 
     setFilter(type, genres) {
@@ -28,36 +33,45 @@ class BubbleChart {
 
     getFilteredData() {
         let vis = this;
-        let filtered = vis._data
-            .filter((d) => d.genres.includes("Action"))
-            .filter((d) => d.reviews >= 500)
-            .filter((d) => d.year >= vis.timeDomain[0] && d.year <= vis.timeDomain[1]);
 
-        if (vis.filterType === "indie") {
-            filtered = filtered.filter(
-                (d) =>
-                    d.genres.includes("Indie") &&
-                    vis.selectedGenres.every((genre) => d.genres.includes(genre))
-            );
+        const baseFilter = (d) =>
+            vis.selectedGenres.every((genre) => d.genres.includes(genre)) &&
+            d.reviews >= 500 &&
+            d.year >= vis.timeDomain[0] && d.year <= vis.timeDomain[1];
+
+        if (vis.compareMode) {
+            const indie = vis._data.filter((d) => d.genres.includes("Indie") && baseFilter(d))
+                .map((d) => ({ ...d, category: "indie" }));
+            const studio = vis._data.filter((d) => !d.genres.includes("Indie") && baseFilter(d))
+                .map((d) => ({ ...d, category: "studio" }));
+            return indie.concat(studio).sort((a, b) => b.reviews - a.reviews);
         } else {
-            filtered = filtered.filter(
-                (d) =>
-                    !d.genres.includes("Indie") &&
-                    vis.selectedGenres.every((genre) => d.genres.includes(genre))
-            );
+            let filtered = vis._data.filter(baseFilter);
+            if (vis.filterType === "indie") {
+                filtered = filtered.filter((d) => d.genres.includes("Indie"));
+            } else {
+                filtered = filtered.filter((d) => !d.genres.includes("Indie"));
+            }
+            return filtered.sort((a, b) => b.reviews - a.reviews);
         }
-
-        return filtered.sort((a, b) => b.reviews - a.reviews);
     }
 
     getColorScale() {
         let vis = this;
-        if (vis.filterType === "indie") {
-            return d3.scaleSequential(d3.interpolateRgb("#2d0052", "#00ffff")).domain([20, 100]);
+
+        if (vis.compareMode) {
+            return function(d) {
+                const cold = d3.scaleLinear().domain([20, 100]).range(["#0048ff", "#00ffff"]);
+                const warm = d3.scaleLinear().domain([20, 100]).range(["#ff6600", "#ffd500"]);
+                return d.category === "indie" ? cold(d.positive) : warm(d.positive);
+            };
         } else {
-            return d3.scaleSequential(d3.interpolateViridis).domain([0, 100]);
+            return function(d) {
+                return vis.color(d.positive);
+            };
         }
     }
+
 
     initVis() {
         let vis = this;
@@ -103,6 +117,8 @@ class BubbleChart {
         const neonCandy = ["#ff007f", "#ff6f00", "#d4ff00", "#00fff7", "#7a00ff"];
         vis.color = d3.scaleLinear().domain([0, 25, 50, 75, 100]).range(neonCandy);
 
+        const colorScale = vis.getColorScale();
+
         const bubbles = vis.gBubbles
             .selectAll("circle")
             .data(filtered)
@@ -110,7 +126,7 @@ class BubbleChart {
             .attr("cx", (d) => x(d.price) + (Math.random() * 4 - 2))
             .attr("cy", (d) => y(d.positive) + (Math.random() * 4 - 2))
             .attr("r", 0)
-            .attr("fill", (d) => vis.color(d.positive))
+            .attr("fill", (d) => colorScale(d))
             .attr("stroke", "#222")
             .attr("stroke-width", 0.5)
             .attr("opacity", 0.8);
@@ -174,6 +190,7 @@ class BubbleChart {
         vis.yAxis.transition().duration(600).call(d3.axisLeft(y));
 
         const circles = vis.gBubbles.selectAll("circle").data(filtered, (d) => d.name);
+        const colorScale = vis.getColorScale();
 
         circles.exit().transition().duration(400).attr("r", 0).remove();
 
@@ -182,7 +199,7 @@ class BubbleChart {
             .attr("cx", (d) => x(d.price))
             .attr("cy", (d) => y(d.positive))
             .attr("r", 0)
-            .attr("fill", (d) => vis.color(d.positive))
+            .attr("fill", (d) => colorScale(d))
             .attr("stroke", "#222")
             .attr("stroke-width", 0.5)
             .attr("opacity", 0.8)

@@ -81,40 +81,67 @@ class FilterControls {
             .attr("value", (d) => d.value)
             .text((d) => d.label);
 
+        const compareMini = dropdownContainer
+            .append("label")
+            .style("margin-left", "20px")
+            .style("color", "#fff")
+            .style("font-size", "13px")
+            .style("cursor", "pointer")
+            .style("display", "inline-flex")
+            .style("align-items", "center");
 
-        const genreContainer = leftCol.append("div");
+        compareMini.append("input")
+            .attr("type", "checkbox")
+            .attr("id", "compare-mini")
+            .style("margin-right", "10px")
+            .on("change", function() {
+                vis.compareMode = this.checked;
+                vis.updateVisualizations();
+            });
+
+        compareMini.append("span").text("Compare");
+
+        const genreContainer = leftCol.append("div")
+            .style("margin-top", "20px");
 
         genreContainer
             .append("label")
             .style("color", "#fff")
             .style("font-weight", "bold")
+            .style("font-size", "15px")
+            .style("letter-spacing", "0.3px")
             .style("display", "block")
             .style("margin-bottom", "10px")
             .text("Select Genres:");
 
         const checkboxGrid = genreContainer
             .append("div")
+            .style("margin-top", "20px")
             .style("display", "grid")
-            .style("grid-template-columns", "repeat(3, 1fr)") // 三列
-            .style("row-gap", "8px")
-            .style("column-gap", "25px")
-            .style("max-width", "360px");
+            .style("grid-template-columns", "repeat(3, 2fr)")
+            .style("row-gap", "20px")
+            .style("column-gap", "30px")
+            .style("max-width", "380px");
 
         vis.availableGenres.forEach((genre) => {
             const label = checkboxGrid
                 .append("label")
-                .style("color", "#fff")
+                .style("color", "#e8e8e8")
                 .style("cursor", "pointer")
                 .style("display", "flex")
-                .style("align-items", "center");
+                .style("align-items", "center")
+                .style("font-size", "14px")
+                .style("transition", "color 0.2s ease");
 
-            label
-                .append("input")
+            label.on("mouseover", () => label.style("color", "#00ffff"))
+                .on("mouseout", () => label.style("color", "#e8e8e8"));
+
+            label.append("input")
                 .attr("type", "checkbox")
                 .attr("class", "genre-checkbox")
                 .attr("value", genre)
                 .property("checked", genre === "Action")
-                .style("margin-right", "5px")
+                .style("margin-right", "6px")
                 .on("change", function () {
                     vis.updateGenreSelection();
                 });
@@ -146,7 +173,7 @@ class FilterControls {
 
         vis.bubbleChart.setFilter(vis.selectedType, vis.selectedGenres);
         vis.timeline.setFilter(vis.selectedType, vis.selectedGenres);
-
+        vis.bubbleChart.setCompareMode(vis.compareMode);
         vis.timeline.updateVis();
 
         const brushSelection = d3.brushSelection(d3.select(".brush").node());

@@ -39,7 +39,9 @@ class Dropdown {
         .selectAll("option")
         .data([
           { value: "indie", label: "Indie Games" },
-          { value: "studio", label: "Studio Games (Non-Indie)" }
+          { value: "studio", label: "Studio Games (Non-Indie)" },
+          { value: "compare", label: "Compare Indie vs Studio" }
+
         ])
         .join("option")
         .attr("value", d => d.value)
