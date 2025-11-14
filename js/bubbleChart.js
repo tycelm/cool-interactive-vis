@@ -17,6 +17,13 @@ class BubbleChart {
         this.color = d3.scaleLinear()
             .domain([0, 25, 50, 75, 100])
             .range(["#ff007f", "#ff6f00", "#d4ff00", "#00fff7", "#7a00ff"]);
+        this.colorIndie = d3.scaleLinear()
+            .domain([0, 50, 100])
+            .range(["#4b82ff", "#00d4ff", "#00ff8c"]);
+
+        this.colorStudio = d3.scaleLinear()
+            .domain([0, 50, 100])
+            .range(["#ffe066", "#ff8c42", "#ff3b3b"]);
     }
 
     /* --- External setters --- */
@@ -125,6 +132,24 @@ class BubbleChart {
 
         // --- X AXES ---
         if (vis.compareMode) {
+            // category labels
+            vis.gAxes.append("text")
+                .attr("x", width/4)
+                .attr("y", margin.top - 10)
+                .attr("fill", "#4b82ff")
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .text("Indie");
+
+            vis.gAxes.append("text")
+                .attr("x", width * 3/4)
+                .attr("y", margin.top - 10)
+                .attr("fill", "#ff8c42")
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                .text("Studio");
+
+
             // left x
             vis.gAxes.append("g")
                 .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -184,17 +209,17 @@ class BubbleChart {
 
         const getRadius = d =>
             vis.compareMode ? rad(d.reviews) * (0.5) : rad(d.reviews);
+        //
+        // vis.colorIndie = d3.scaleLinear()
+        //     .domain([0, 50, 100])
+        //     .range(["#4b82ff", "#00d4ff", "#00ff8c"]);
+        //
+        // vis.colorStudio = d3.scaleLinear()
+        //     .domain([0, 50, 100])
+        //     .range(["#ffe066", "#ff8c42", "#ff3b3b"]);
+        //
 
-        vis.colorIndie = d3.scaleLinear()
-            .domain([0, 50, 100])
-            .range(["#4b82ff", "#00d4ff", "#00ff8c"]);
-
-        vis.colorStudio = d3.scaleLinear()
-            .domain([0, 50, 100])
-            .range(["#ffe066", "#ff8c42", "#ff3b3b"]);
-
-
-        vis.gBubbles.selectAll("*").remove(); // clear
+        // vis.gBubbles.selectAll("*").remove(); // clear
 
         // helper for position
         const getX = d =>
@@ -233,33 +258,64 @@ class BubbleChart {
             // .attr("r", d => rad(d.reviews));
             .attr("r", d => getRadius(d));
 
+        // bubbles
+        //     .on("mouseover", (event, d) => {
+        //         const circle = d3.select(event.currentTarget);
+        //         circle
+        //             .style("filter", "drop-shadow(0 0 8px white)")
+        //             .attr("stroke-width", 1.5);
+        //
+        //         const box = event.currentTarget.getBoundingClientRect();
+        //         const tw = tooltip.node().offsetWidth;
+        //         const th = tooltip.node().offsetHeight;
+        //         const pad = 10;
+        //
+        //         const xPos = box.left + box.width / 2 - tw / 2 + window.scrollX - 150;
+        //         const yPos = box.top - th - pad + window.scrollY - 50;
+        //
+        //         tooltip
+        //             .style("left", `${xPos}px`)
+        //             .style("top", `${yPos}px`)
+        //             .style("opacity", 1)
+        //             .html(`
+        //             <strong>${d.name}</strong><br>
+        //             Price: $${d.price}<br>
+        //             Positive: ${d.positive}%<br>
+        //             Reviews: ${d.reviews}
+        //         `);
+        //     })
+        //     .on("mouseout", (event) => {
+        //         d3.select(event.currentTarget)
+        //             .style("filter", "none")
+        //             .attr("stroke-width", 0.5);
+        //         tooltip.style("opacity", 0);
+        //     });
+        bubbles.on("mouseover", (event, d) => {
+            const circle = d3.select(event.currentTarget);
+            circle.style("filter", "drop-shadow(0 0 8px white)")
+                .attr("stroke-width", 1.5);
 
-        bubbles
-            .on("mouseover", (event, d) => {
-                const circle = d3.select(event.currentTarget);
-                circle
-                    .style("filter", "drop-shadow(0 0 8px white)")
-                    .attr("stroke-width", 1.5);
+            const circleBox = event.currentTarget.getBoundingClientRect();
+            const tooltipWidth = tooltip.node().offsetWidth;
+            const tooltipHeight = tooltip.node().offsetHeight;
+            const padding = 10;
 
-                const box = event.currentTarget.getBoundingClientRect();
-                const tw = tooltip.node().offsetWidth;
-                const th = tooltip.node().offsetHeight;
-                const pad = 10;
+            const xPos = circleBox.left + circleBox.width / 2 - tooltipWidth / 2
+                + window.scrollX - 150;
+            const yPos = circleBox.top - tooltipHeight - padding
+                + window.scrollY - 50;
 
-                const xPos = box.left + box.width / 2 - tw / 2 + window.scrollX - 150;
-                const yPos = box.top - th - pad + window.scrollY - 50;
-
-                tooltip
-                    .style("left", `${xPos}px`)
-                    .style("top", `${yPos}px`)
-                    .style("opacity", 1)
-                    .html(`
-                    <strong>${d.name}</strong><br>
-                    Price: $${d.price}<br>
-                    Positive: ${d.positive}%<br>
-                    Reviews: ${d.reviews}
-                `);
-            })
+            tooltip
+                .style("left", `${xPos}px`)
+                .style("top", `${yPos}px`)
+                .style("opacity", 1)
+                .html(`
+            <strong>${d.name}</strong><br>
+            Price: $${d.price}<br>
+            Positive: ${d.positive}%<br>
+            Reviews: ${d.reviews}
+        `);
+        })
             .on("mouseout", (event) => {
                 d3.select(event.currentTarget)
                     .style("filter", "none")
@@ -367,6 +423,33 @@ class BubbleChart {
 
 
         // ---------- Tooltip handlers ----------
+        // vis.gBubbles.selectAll("circle")
+        //     .on("mouseover", (event, d) => {
+        //         const circle = d3.select(event.currentTarget);
+        //         circle.style("filter", "drop-shadow(0 0 8px white)")
+        //             .attr("stroke-width", 1.5);
+        //
+        //         const box = event.currentTarget.getBoundingClientRect();
+        //         const tw = tooltip.node().offsetWidth;
+        //         const th = tooltip.node().offsetHeight;
+        //
+        //         tooltip
+        //             .style("left", `${box.left + box.width/2 - tw/2}px`)
+        //             .style("top", `${box.top - th - 15}px`)
+        //             .style("opacity", 1)
+        //             .html(`
+        //             <strong>${d.name}</strong><br>
+        //             Price: $${d.price}<br>
+        //             Positive: ${d.positive}%<br>
+        //             Reviews: ${d.reviews}
+        //         `);
+        //     })
+        //     .on("mouseout", (event) => {
+        //         d3.select(event.currentTarget)
+        //             .style("filter", "none")
+        //             .attr("stroke-width", 0.5);
+        //         tooltip.style("opacity", 0);
+        //     });
         vis.gBubbles.selectAll("circle")
             .on("mouseover", (event, d) => {
                 const circle = d3.select(event.currentTarget);
@@ -374,19 +457,25 @@ class BubbleChart {
                     .attr("stroke-width", 1.5);
 
                 const box = event.currentTarget.getBoundingClientRect();
-                const tw = tooltip.node().offsetWidth;
-                const th = tooltip.node().offsetHeight;
+                const tooltipWidth = tooltip.node().offsetWidth;
+                const tooltipHeight = tooltip.node().offsetHeight;
+                const padding = 10;
+
+                const xPos = box.left + box.width / 2 - tooltipWidth / 2
+                    + window.scrollX - 150;
+                const yPos = box.top - tooltipHeight - padding
+                    + window.scrollY - 50;
 
                 tooltip
-                    .style("left", `${box.left + box.width/2 - tw/2}px`)
-                    .style("top", `${box.top - th - 15}px`)
+                    .style("left", `${xPos}px`)
+                    .style("top", `${yPos}px`)
                     .style("opacity", 1)
                     .html(`
-                    <strong>${d.name}</strong><br>
-                    Price: $${d.price}<br>
-                    Positive: ${d.positive}%<br>
-                    Reviews: ${d.reviews}
-                `);
+                <strong>${d.name}</strong><br>
+                Price: $${d.price}<br>
+                Positive: ${d.positive}%<br>
+                Reviews: ${d.reviews}
+            `);
             })
             .on("mouseout", (event) => {
                 d3.select(event.currentTarget)
@@ -394,6 +483,7 @@ class BubbleChart {
                     .attr("stroke-width", 0.5);
                 tooltip.style("opacity", 0);
             });
+
     }
 
 
