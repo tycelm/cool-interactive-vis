@@ -114,8 +114,8 @@ class BubbleChart {
             .range([margin.left, width - margin.right]);
 
         vis.y = d3.scaleLinear()
-            .domain([0, 100])
-            .range([height - margin.bottom, margin.top]);
+            .domain([0, 106])
+            .range([height - margin.bottom, margin.top])
 
         // --- LEFT Y ---
         vis.gAxes.append("g")
