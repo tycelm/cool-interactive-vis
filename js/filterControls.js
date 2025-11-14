@@ -172,8 +172,8 @@ class FilterControls {
         let vis = this;
 
         vis.bubbleChart.setFilter(vis.selectedType, vis.selectedGenres);
-        vis.timeline.setFilter(vis.selectedType, vis.selectedGenres);
         vis.bubbleChart.setCompareMode(vis.compareMode);
+        vis.timeline.setFilter(vis.selectedType, vis.selectedGenres);
         vis.timeline.updateVis();
 
         const brushSelection = d3.brushSelection(d3.select(".brush").node());
