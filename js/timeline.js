@@ -1,5 +1,6 @@
 // this script draws a timeline and passes the year range into the bubble chart
 const timelineHeight = 100;
+const timelineWidth = 800;
 const timelineMargin = { top: 20, right: 40, bottom: 20, left: 40 };
 
 class Timeline {
@@ -17,18 +18,22 @@ class Timeline {
 
   getFilteredData() {
     let vis = this;
-    
+
     if (vis.filterType === "indie") {
       // Filter for Indie games (must include "Indie" genre AND all selected genres)
-      return vis._data.filter(d => {
-        return d.genres.includes("Indie") && 
-               vis.selectedGenres.every(genre => d.genres.includes(genre));
+      return vis._data.filter((d) => {
+        return (
+          d.genres.includes("Indie") &&
+          vis.selectedGenres.every((genre) => d.genres.includes(genre))
+        );
       });
     } else {
       // Filter for Studio games (must NOT include "Indie" genre, but include all selected genres)
-      return vis._data.filter(d => {
-        return !d.genres.includes("Indie") && 
-               vis.selectedGenres.every(genre => d.genres.includes(genre));
+      return vis._data.filter((d) => {
+        return (
+          !d.genres.includes("Indie") &&
+          vis.selectedGenres.every((genre) => d.genres.includes(genre))
+        );
       });
     }
   }
@@ -67,7 +72,7 @@ class Timeline {
     vis.timeX = d3
       .scaleLinear()
       .domain(yearRange)
-      .range([timelineMargin.left, width - timelineMargin.right]);
+      .range([timelineMargin.left, timelineWidth - timelineMargin.right]);
 
     vis.countY = d3
       .scaleLinear()
@@ -78,7 +83,7 @@ class Timeline {
     vis.svg = d3
       .select("#timeline")
       .append("svg")
-      .attr("width", width + timelineMargin.left + timelineMargin.right)
+      .attr("width", timelineWidth + timelineMargin.left + timelineMargin.right)
       .attr("height", timelineHeight)
       .append("g")
       .attr("transform", "translate(" + timelineMargin.right + ",0)");
@@ -104,7 +109,7 @@ class Timeline {
       .y0(vis.countY(0)) // baseline (where the area starts)
       .y1((d) => vis.countY(d.count))
       .curve(d3.curveCardinal);
-    
+
     // draw line graph
     vis.svg
       .append("path")
@@ -118,7 +123,7 @@ class Timeline {
       .brushX()
       .extent([
         [timelineMargin.left, 0],
-        [width - timelineMargin.right, timelineHeight],
+        [timelineWidth - timelineMargin.right, timelineHeight],
       ])
       .on("brush", brushed);
 
@@ -148,7 +153,7 @@ class Timeline {
           )
       )
       .append("text")
-      .attr("x", width / 2)
+      .attr("x", timelineWidth / 2)
       .attr("y", 40)
       .attr("fill", "#fff")
       .attr("text-anchor", "middle")
@@ -182,12 +187,14 @@ class Timeline {
     vis.countY.domain([0, d3.max(yearData, (d) => d.count)]);
 
     // update axes
-    vis.svg.select(".y-axis")
+    vis.svg
+      .select(".y-axis")
       .transition()
       .duration(1000)
       .call(d3.axisLeft(vis.countY).ticks(3));
 
-    vis.svg.select(".x-axis")
+    vis.svg
+      .select(".x-axis")
       .transition()
       .duration(1000)
       .call(
@@ -207,7 +214,8 @@ class Timeline {
       .y1((d) => vis.countY(d.count))
       .curve(d3.curveCardinal);
 
-    vis.svg.select(".area-path")
+    vis.svg
+      .select(".area-path")
       .datum(yearData)
       .transition()
       .duration(1000)
@@ -216,7 +224,7 @@ class Timeline {
     // update brush extent
     vis.brush.extent([
       [timelineMargin.left, 0],
-      [width - timelineMargin.right, timelineHeight],
+      [timelineWidth - timelineMargin.right, timelineHeight],
     ]);
 
     vis.svg.select(".x.brush").call(vis.brush);
