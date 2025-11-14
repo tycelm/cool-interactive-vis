@@ -130,6 +130,22 @@ class BubbleChart {
             .attr("transform", "rotate(-90)")
             .text("Positive Rating (%)");
 
+        // --- Horizontal grid lines ---
+        const yTicks = vis.y.ticks(10);
+
+        vis.gAxes.selectAll(".y-grid")
+            .data(yTicks.slice(0, -1))
+            .enter()
+            .append("line")
+            .attr("class", "y-grid")
+            .attr("x1", margin.left)
+            .attr("x2", width - margin.right)
+            .attr("y1", d => vis.y(d))
+            .attr("y2", d => vis.y(d))
+            .attr("stroke", "#555")
+            .attr("stroke-width", 0.6)
+            .attr("opacity", 0.25);
+
         // --- X AXES ---
         if (vis.compareMode) {
             // category labels
@@ -148,7 +164,6 @@ class BubbleChart {
                 .attr("text-anchor", "middle")
                 .attr("font-size", "16px")
                 .text("Studio");
-
 
             // left x
             vis.gAxes.append("g")
